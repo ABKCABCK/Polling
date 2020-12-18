@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <title>Poll Website Dev</title>
+
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 col-sm-8 col-sm-push-2 text-center">
+        <h1 class="text-center">Poll Website Dev</h1>
+
+        <button class="btn btn-default btn-raise" type="button" data-id="0" data-toggle="modal"
+          data-target="#pollSubmitModal">Raise Your Own Poll!</button>
+        <hr />
+
+        <br />
+      </div>
+
+    </div>
+
+    <div id="pollsRow" class="row">
+    </div>
+  </div>
+
+  <div id="pollTemplate" style="display: none;">
+    <div class="col-sm-6 col-md-4 col-lg-3">
+      <div class="panel panel-default panel-poll">
+        <div class="panel-heading">
+          <h3 class="panel-title">Scrappy</h3>
+        </div>
+        <div class="panel-body blockquote">
+          <img alt="140x140" data-src="holder.js/140x140" class="img-rounded img-center" style="width: 100%;"
+            src="https://animalso.com/wp-content/uploads/2017/01/Golden-Retriever_6.jpg" data-holder-rendered="true">
+          <br /><br />
+          <strong>Sponsor</strong>: <span class="poll-sponsor" style="word-wrap:break-word">CC</span><br /><br />
+          <strong>Description</strong>: <span class="poll-description">Description Of CC</span><br />
+          <strong>Expired Block</strong>: <span class="poll-expired-block">99999</span><br />
+          <strong>Voters</strong>: <span class="poll-voters" style="word-wrap:break-word">0xabc...</span><br />
+          <button class="btn btn-default btn-vote" type="button" data-id="1">Vote</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="pollSubmitModal" tabindex="-1" role="dialog" aria-labelledby="pollSubmitModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title text-center" id="pollSubmitModalLabel">Create a poll</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+
+        <form id="pollForm" name="poll" role="form">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="newTopic">Topic</label>
+            <input type=" text" class="form-control" value="test topic" id="newTopic">
+            </div>
+            <div class="form-group">
+              <label for="newDescription"">Description</label>
+            <input type=" text" class="form-control" value="test description" id="newDescription">
+            </div>
+            <!-- <label for="newPicURL"">Picture URL</label>
+          <input type="text" class="form-control" id="newPicURL"> -->
+            <div class="form-group">
+              <label for="expiredBlock"">Expired Block</label>
+              <input type=" number" class="form-control" value="100000" id="expiredBlock">
+            </div>
+            <div class="form-group">
+              <button type="submit" class="btn btn-success btn-primary" id="submit">Submit Poll</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/web3.min.js"></script>
+  <script src="js/truffle-contract.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
