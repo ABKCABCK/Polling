@@ -117,4 +117,8 @@ contract Polling {
     function getVotersPollList() public view returns (bytes32[] memory) {
         return pollIdOfVoter[msg.sender];
     }
+
+    function isVoted(bytes32 _pollId) public view returns (bool) {
+        return voterPolled[msg.sender][_pollId];
+    }
 }

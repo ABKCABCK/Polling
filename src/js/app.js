@@ -28,6 +28,13 @@ App = {
       App.web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
     }
     web3 = new Web3(App.web3Provider);
+
+    web3.eth.getAccounts((error, accounts) => {
+      if (error)
+        console.log(error);
+
+      $("#yourAccount").text(`Your Account ↓\n ${accounts[0]}`)
+    })
     return App.initContract();
   },
 
@@ -69,7 +76,15 @@ App = {
         pollTemplate.find('.poll-sponsor').text(pollData[2]);
         pollTemplate.find('.poll-voters').text(pollData[3].join('\n'));
         pollTemplate.find('.poll-expired-block').text(pollData[4]);
+
         pollTemplate.find('.btn-vote').attr('data-id', pollList[i]);
+
+        const voted = await pollingInstance.isVoted.call(pollList[i]);
+        if (voted) {
+          pollTemplate.find('.btn-vote').prop('disabled', true);
+        } else {
+          pollTemplate.find('.btn-vote').prop('disabled', false);
+        }
 
         pollsRow.append(pollTemplate.html());
       }
@@ -115,7 +130,7 @@ App = {
     console.log({ topic, description, expiredBlock })
 
     $("#pollSubmitModal").modal("hide");
-    
+
     let pollingInstance;
 
     web3.eth.getAccounts((error, accounts) => {
