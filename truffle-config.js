@@ -104,9 +104,11 @@ module.exports = {
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
-    reporter: 'list',
-    // timeout: 100000
+    reporter: 'eth-gas-reporter',
+    reporterOptions : { excludeContracts: ['Migrations'] }
   },
+
+  plugins: ["solidity-coverage"],
 
   // Configure your compilers
   compilers: {
