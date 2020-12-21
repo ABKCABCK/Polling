@@ -4,25 +4,36 @@ module.exports = async function (deployer, networks, accounts) {
   await deployer.deploy(Polling);
 
   //test
-  const pollInstance = await Polling.deployed();
-  console.log({ address: pollInstance.address })
 
-  let expiredBlock = 0;
-  const sponsor = accounts[0];
+  if (networks === 'development') {
+    const pollInstance = await Polling.deployed();
+    console.log({ address: pollInstance.address })
 
-  expiredBlock += 10000;
-  await pollInstance.sponsorCreatePoll('topic_1', 'description_1', expiredBlock, {
-    from: sponsor,
-  })
+    let expiredBlock = 0;
 
-  expiredBlock += 10000;
-  await pollInstance.sponsorCreatePoll('topic_2', 'description_2', expiredBlock, {
-    from: sponsor,
-  })
+    let TEST_OPTION = [
+      '~100',
+      '101~200',
+      '201~300',
+      '300~',
+    ].map(e=>web3.utils.utf8ToHex(e))
 
-  expiredBlock += 10000;
-  await pollInstance.sponsorCreatePoll('topic_3', 'description_3', expiredBlock, {
-    from: sponsor,
-  })
+    const sponsor = accounts[0];
+
+    expiredBlock += 10000;
+    await pollInstance.sponsorCreatePoll('Annual Income(T)', 'What\'s your annual income?(In thousand)', TEST_OPTION, expiredBlock, {
+      from: sponsor,
+    })
+
+    expiredBlock += 10000;
+    await pollInstance.sponsorCreatePoll('Annual Income(M)', 'What\'s your annual income?(In million)', TEST_OPTION, expiredBlock, {
+      from: sponsor,
+    })
+
+    expiredBlock += 10000;
+    await pollInstance.sponsorCreatePoll('Annual Income(B)', 'What\'s your annual income?(In billion)', TEST_OPTION, expiredBlock, {
+      from: sponsor,
+    })
+  }
 };
 

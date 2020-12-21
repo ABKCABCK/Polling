@@ -2,10 +2,11 @@ App = {
   web3Provider: null,
   contracts: {},
 
+  accounts: undefined,
+
   init: async function () {
     // Load pets.
     console.log("Initialization....")
-
     return await App.initWeb3();
   },
 
@@ -29,12 +30,10 @@ App = {
     }
     web3 = new Web3(App.web3Provider);
 
-    web3.eth.getAccounts((error, accounts) => {
-      if (error)
-        console.log(error);
+    accounts = await web3.eth.getAccounts();
 
-      $("#yourAccount").text(`Your Account ↓\n ${accounts[0]}`)
-    })
+    $("#yourAccount").text(`Your Account ↓\n ${accounts[0]}`)
+
     return App.initContract();
   },
 
@@ -70,12 +69,33 @@ App = {
       for (i = 0; i < pollList.length; i++) {
 
         const pollData = await pollingInstance.getPollInformation.call(pollList[i]);
-        pollTemplate.find('.panel-title').text(pollData[0]);
+        console.log({ pollData })
+        pollTemplate.find('.panel-title').text(pollData._topic);
         // pollTemplate.find('img').attr('src', pollData.picture);
-        pollTemplate.find('.poll-description').text(pollData[1]);
-        pollTemplate.find('.poll-sponsor').text(pollData[2]);
-        pollTemplate.find('.poll-voters').text(pollData[3].join('\n'));
-        pollTemplate.find('.poll-expired-block').text(pollData[4]);
+        pollTemplate.find('.poll-description').text(pollData._description);
+        pollTemplate.find('.poll-sponsor').text(pollData._sponsor);
+        
+        let inputTemplate = '';
+        for (let i = 0; i < pollData._options.length; i++) {
+          // const str = web3.utils.hexToUtf8(pollData._options[i]);
+          const str = web3.utils.hexToUtf8(web3.utils.numberToHex(pollData._options[i]));
+          console.log({ str });
+          // pollOptions.append(`
+          inputTemplate += (`
+              <input
+                class="form-check-input poll-options"
+                type="radio"
+                name="pollOption"
+                id="pollOption${i}"
+              />
+              <label class="form-check-label" for="pollOption${i}">${str}</label>
+              <br />
+          `)
+        }
+        pollTemplate.find('.poll-options').html(inputTemplate);
+
+        pollTemplate.find('.poll-voters').text(pollData[4].join('\n'));
+        pollTemplate.find('.poll-expired-block').text(pollData._expiredBlock);
 
         pollTemplate.find('.btn-vote').attr('data-id', pollList[i]);
 
@@ -101,22 +121,14 @@ App = {
 
     let pollingInstance;
 
-    web3.eth.getAccounts((error, accounts) => {
-      if (error)
-        console.log(error);
-
-      const account = accounts[0];
-
-      App.contracts.Polling.deployed().then((inst) => {
-        pollingInstance = inst;
-
-        return pollingInstance.voterPolls(pollId, { from: account });
-      }).then((result) => {
-        console.log({ result })
-        return location.reload();
-      }).catch((err) => {
-        console.log(err.message);
-      });
+    App.contracts.Polling.deployed().then((inst) => {
+      pollingInstance = inst;
+      return pollingInstance.voterPolls(pollId, { from: accounts[0] });
+    }).then((result) => {
+      console.log({ result })
+      return location.reload();
+    }).catch((err) => {
+      console.log(err.message);
     });
   },
 
@@ -125,30 +137,27 @@ App = {
     console.log({ event })
     const topic = $("#newTopic").val();
     const description = $("#newDescription").val();
-    const expiredBlock = parseInt($("#expiredBlock").val());
+    const options = [
+      $("#option1").val(),
+      $("#option2").val(),
+      $("#option3").val(),
+      $("#option4").val(),
+    ].map(e => web3.utils.utf8ToHex(e));
+    const expiry = parseInt($("#expiry").val());
 
-    console.log({ topic, description, expiredBlock })
-
-    $("#pollSubmitModal").modal("hide");
+    console.log({ topic, description, expiry, options })
 
     let pollingInstance;
 
-    web3.eth.getAccounts((error, accounts) => {
-      if (error)
-        console.log(error);
-
-      const account = accounts[0];
-
-      App.contracts.Polling.deployed().then((inst) => {
-        pollingInstance = inst;
-
-        return pollingInstance.sponsorCreatePoll(topic, description, expiredBlock, { from: account });
-      }).then((result) => {
-        console.log({ result })
-        return location.reload();
-      }).catch((err) => {
-        console.log(err.message);
-      });
+    App.contracts.Polling.deployed().then((inst) => {
+      pollingInstance = inst;
+      return pollingInstance.sponsorCreatePoll(topic, description, options, expiry, { from: accounts[0] });
+    }).then((result) => {
+      console.log({ result })
+      $("#pollSubmitModal").modal("hide");
+      return location.reload();
+    }).catch((err) => {
+      console.log(err.message);
     });
   }
 

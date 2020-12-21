@@ -13,7 +13,7 @@ contract Polling {
 
     struct Answer {
         bytes32 pollId;
-        uint choice;
+        bytes32 choice;
     }
     // track poll by poll id
     mapping(bytes32 => Poll) public polls;
@@ -24,6 +24,7 @@ contract Polling {
     mapping(address => Answer[]) public answerOfVoter;
     // mapping(address => bytes32[]) public pollIdOfVoter;
     mapping(address => mapping(bytes32 => bool)) private voterPolled;
+    mapping(bytes32 => mapping(bytes32 => bool)) private optionRegistry;
 
     uint256 public totalPollsCount;
     bytes32[] public pollList;
@@ -67,7 +68,7 @@ contract Polling {
         return true;
     }
 
-    function voterPolls(bytes32 _pollId, uint _choice) external returns (bool) {
+    function voterPolls(bytes32 _pollId, bytes32 _choice) external returns (bool) {
         require(polls[_pollId].sponsor != address(0), "Poll isn't existed");
 
         (, bool _expired) = getPollStatus(_pollId);
@@ -97,7 +98,7 @@ contract Polling {
             address _sponsor,
             uint[] memory _options,
             address[] memory _voters,
-            uint256 _blockLeft,
+            uint256 _expiredBlock,
             bool _expired
         )
     {
@@ -108,7 +109,8 @@ contract Polling {
         _sponsor = poll.sponsor;
         _options = poll.options;
         _voters = poll.voters;
-        (_blockLeft, _expired) = getPollStatus(_pollId);
+        _expiredBlock = poll.expiredBlock;
+        (, _expired) = getPollStatus(_pollId);
     }
 
     function getPollStatus(bytes32 _pollId)
@@ -129,9 +131,14 @@ contract Polling {
         return pollIdOfSponsor[msg.sender];
     }
 
-    // function getVotersPollList() public view returns (bytes32[] memory) {
-    //     return pollIdOfVoter[msg.sender];
-    // }
+    function getVotersPollList() public view returns (bytes32[] memory) {
+        uint _l = answerOfVoter[msg.sender].length;
+        bytes32[] memory _pollList = new bytes32[](_l);
+        for (uint i=0; i<_l; i++) {
+            _pollList[i] = answerOfVoter[msg.sender][i].pollId;
+        }
+        return _pollList;
+    }
 
     function isVoted(bytes32 _pollId) public view returns (bool) {
         return voterPolled[msg.sender][_pollId];

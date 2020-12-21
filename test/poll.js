@@ -11,10 +11,17 @@ const truffleAssert = require('truffle-assertions');
 contract("Polling", function (accounts) {
   const TEST_TOPIC = "TEST_TOPIC";
   const TEST_DESCRIPTION = "TEST_DESCRIPTION";
+  let TEST_OPTION = [
+    '~100',
+    '101~200',
+    '201~300',
+    '300~',
+  ]
 
   let testSponsor, testVoter, testExpiredBlock;
   let pollContractInstance;
   let finalPollList;
+
 
   before(async () => {
     testSponsor = accounts[0];
@@ -28,10 +35,17 @@ contract("Polling", function (accounts) {
       testVoter,
       testExpiredBlock,
     })
+
+    TEST_OPTION = TEST_OPTION.map(e => {
+      // return web3.utils.hexToBytes(web3.utils.utf8ToHex(e));
+      return web3.utils.utf8ToHex(e);
+    })
+
+    console.log({ TEST_OPTION })
   })
 
   it("should successfully create a poll", async function () {
-
+    
     let pollList, pollIdOfSponsor;
 
     pollList = await pollContractInstance.getPollList();
@@ -42,6 +56,7 @@ contract("Polling", function (accounts) {
     await pollContractInstance.sponsorCreatePoll(
       TEST_TOPIC,
       TEST_DESCRIPTION,
+      TEST_OPTION,
       testExpiredBlock,
       { from: testSponsor }
     );
@@ -54,6 +69,7 @@ contract("Polling", function (accounts) {
     await pollContractInstance.sponsorCreatePoll(
       TEST_TOPIC,
       TEST_DESCRIPTION,
+      TEST_OPTION,
       testExpiredBlock,
       { from: testSponsor }
     );
@@ -66,6 +82,7 @@ contract("Polling", function (accounts) {
     await pollContractInstance.sponsorCreatePoll(
       TEST_TOPIC,
       TEST_DESCRIPTION,
+      TEST_OPTION,
       testExpiredBlock,
       { from: accounts[3] }
     );
@@ -84,6 +101,7 @@ contract("Polling", function (accounts) {
       pollContractInstance.sponsorCreatePoll(
         TEST_TOPIC,
         TEST_DESCRIPTION,
+        TEST_OPTION,
         1,
         { from: testSponsor }
       ),
@@ -100,15 +118,16 @@ contract("Polling", function (accounts) {
 
     let pollId = finalPollList[0];
 
-    let status, pollIdOfVoter;
+    let status, pollIdOfVoter, choice;
 
     status = await pollContractInstance.polls(pollId);
+    choice = TEST_OPTION[0];
     pollIdOfVoter = await pollContractInstance.getVotersPollList({ from: testVoter });
     assert.strictEqual(status._voters, undefined, "Polling Contract: invalid voter length of poll before first voting at 0");
     assert.strictEqual(pollIdOfVoter.length, 0, "Polling Contract: invalid poll length of voter before first voting at 0");
 
     await pollContractInstance.voterPolls(
-      pollId,
+      pollId, choice,
       { from: testVoter }
     );
     status = await pollContractInstance.getPollInformation(pollId);
@@ -117,7 +136,7 @@ contract("Polling", function (accounts) {
     assert.strictEqual(pollIdOfVoter.length, 1, "Polling Contract: invalid poll length of voter after first voting at 0");
 
     await pollContractInstance.voterPolls(
-      pollId,
+      pollId, choice,
       { from: accounts[2] }
     );
     status = await pollContractInstance.getPollInformation(pollId);
@@ -126,9 +145,10 @@ contract("Polling", function (accounts) {
     assert.strictEqual(pollIdOfVoter.length, 1, "Polling Contract: invalid poll length of voter after second voting at 0");
 
     pollId = finalPollList[1];
+    choice = TEST_OPTION[1];
 
     await pollContractInstance.voterPolls(
-      pollId,
+      pollId, choice,
       { from: testVoter }
     );
     status = await pollContractInstance.getPollInformation(pollId);
@@ -137,9 +157,10 @@ contract("Polling", function (accounts) {
     assert.strictEqual(pollIdOfVoter.length, 2, "Polling Contract: invalid poll length of voter after first voting at 1");
 
     pollId = finalPollList[2];
+    choice = TEST_OPTION[2];
 
     await pollContractInstance.voterPolls(
-      pollId,
+      pollId, choice,
       { from: testVoter }
     );
     status = await pollContractInstance.getPollInformation(pollId);
@@ -153,7 +174,7 @@ contract("Polling", function (accounts) {
   it("should fail to vote again", async function () {
     truffleAssert.fails(
       pollContractInstance.voterPolls(
-        finalPollList[0],
+        finalPollList[0], TEST_OPTION[0],
         { from: testVoter }
       ),
       truffleAssert.ErrorType.REVERT,
@@ -163,7 +184,7 @@ contract("Polling", function (accounts) {
 
     truffleAssert.fails(
       pollContractInstance.voterPolls(
-        finalPollList[1],
+        finalPollList[1], TEST_OPTION[1],
         { from: testVoter }
       ),
       truffleAssert.ErrorType.REVERT,
@@ -173,7 +194,7 @@ contract("Polling", function (accounts) {
 
     truffleAssert.fails(
       pollContractInstance.voterPolls(
-        finalPollList[2],
+        finalPollList[2], TEST_OPTION[2],
         { from: testVoter }
       ),
       truffleAssert.ErrorType.REVERT,
@@ -197,7 +218,7 @@ contract("Polling", function (accounts) {
   it("should fail to vote a inexisted poll", async function () {
     truffleAssert.fails(
       pollContractInstance.voterPolls(
-        "0xfoobar",
+        "0xfoobar", TEST_OPTION[0],
         { from: testVoter }
       ),
       truffleAssert.ErrorType.REVERT,
@@ -207,7 +228,7 @@ contract("Polling", function (accounts) {
 
     truffleAssert.fails(
       pollContractInstance.voterPolls(
-        undefined,
+        undefined, TEST_OPTION[0],
         { from: testVoter }
       ),
       truffleAssert.ErrorType.REVERT,
