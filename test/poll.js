@@ -45,7 +45,7 @@ contract("Polling", function (accounts) {
   })
 
   it("should successfully create a poll", async function () {
-    
+
     let pollList, pollIdOfSponsor;
 
     pollList = await pollContractInstance.getPollList();
@@ -92,6 +92,16 @@ contract("Polling", function (accounts) {
     assert.strictEqual(pollList.length, 3, "Polling Contract: invalid poll list length after third polling");
     assert.strictEqual(pollIdOfSponsor.length, 1, "Polling Contract: invalid poll length of sponsor after third polling");
 
+    let registryStatus = await pollContractInstance.isOptionBelongToPoll(pollList[0], TEST_OPTION[0])
+    assert.isTrue(registryStatus, "Polling Contract: should be true");
+    registryStatus = await pollContractInstance.isOptionBelongToPoll(pollList[0], TEST_OPTION[1])
+    assert.isTrue(registryStatus, "Polling Contract: should be true");
+    registryStatus = await pollContractInstance.isOptionBelongToPoll(pollList[0], TEST_OPTION[2])
+    assert.isTrue(registryStatus, "Polling Contract: should be true");
+    registryStatus = await pollContractInstance.isOptionBelongToPoll(pollList[0], TEST_OPTION[3])
+    assert.isTrue(registryStatus, "Polling Contract: should be true");
+    registryStatus = await pollContractInstance.isOptionBelongToPoll(pollList[0], TEST_OPTION[3] + "123")
+    assert.isFalse(registryStatus, "Polling Contract: should be false");
     finalPollList = pollList;
     return true;
   });
@@ -190,6 +200,16 @@ contract("Polling", function (accounts) {
       truffleAssert.ErrorType.REVERT,
       "You've polled for this",
       "Polling Contract: should not be voted again at 1",
+    );
+
+    truffleAssert.fails(
+      pollContractInstance.voterPolls(
+        finalPollList[1], TEST_OPTION[1]+"123",
+        { from: testVoter }
+      ),
+      truffleAssert.ErrorType.REVERT,
+      "Poll doesn't have such choice",
+      "Polling Contract: inexisted option should not be choiced",
     );
 
     truffleAssert.fails(

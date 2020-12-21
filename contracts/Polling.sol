@@ -6,7 +6,7 @@ contract Polling {
         string topic;
         address sponsor;
         string description;
-        uint[] options;
+        bytes32[] options;
         uint256 expiredBlock;
         address[] voters;
     }
@@ -36,7 +36,7 @@ contract Polling {
     function sponsorCreatePoll(
         string calldata _topic,
         string calldata _description,
-        uint[] calldata _options,
+        bytes32[] calldata _options,
         uint256 _expiredBlock
     ) external returns (bool) {
         require(_expiredBlock > block.number, "Invalid expired block");
@@ -63,6 +63,10 @@ contract Polling {
         pollIdOfSponsor[_sponsor].push(_pollId);
         sponsorRaised[_sponsor][_pollId] = true;
 
+        for (uint i=0; i<_options.length; i++) {
+            optionRegistry[_pollId][_options[i]] = true;
+        }
+
         pollList.push(_pollId);
 
         return true;
@@ -70,7 +74,7 @@ contract Polling {
 
     function voterPolls(bytes32 _pollId, bytes32 _choice) external returns (bool) {
         require(polls[_pollId].sponsor != address(0), "Poll isn't existed");
-
+        require(optionRegistry[_pollId][_choice], "Poll doesn't have such choice");
         (, bool _expired) = getPollStatus(_pollId);
         require(!_expired, "Poll is expired");
 
@@ -96,7 +100,7 @@ contract Polling {
             string memory _topic,
             string memory _description,
             address _sponsor,
-            uint[] memory _options,
+            bytes32[] memory _options,
             address[] memory _voters,
             uint256 _expiredBlock,
             bool _expired
@@ -142,5 +146,9 @@ contract Polling {
 
     function isVoted(bytes32 _pollId) public view returns (bool) {
         return voterPolled[msg.sender][_pollId];
+    }
+
+    function isOptionBelongToPoll(bytes32 _pollId, bytes32 _choice) public view returns (bool) {
+        return optionRegistry[_pollId][_choice];
     }
 }

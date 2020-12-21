@@ -5,8 +5,9 @@ module.exports = async function (deployer, networks, accounts) {
 
   //test
 
-  if (networks === 'development') {
-    const pollInstance = await Polling.deployed();
+  if (networks === 'rinkeby') {
+    // if (networks === 'development') {
+      const pollInstance = await Polling.deployed();
     console.log({ address: pollInstance.address })
 
     let expiredBlock = 0;
@@ -30,10 +31,10 @@ module.exports = async function (deployer, networks, accounts) {
       from: sponsor,
     })
 
-    expiredBlock += 10000;
-    await pollInstance.sponsorCreatePoll('Annual Income(B)', 'What\'s your annual income?(In billion)', TEST_OPTION, expiredBlock, {
-      from: sponsor,
-    })
+    // expiredBlock += 10000;
+    // await pollInstance.sponsorCreatePoll('Annual Income(B)', 'What\'s your annual income?(In billion)', TEST_OPTION, expiredBlock, {
+    //   from: sponsor,
+    // })
   }
 };
 

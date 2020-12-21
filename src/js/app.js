@@ -62,41 +62,35 @@ App = {
       return pollingInstance.getPollList.call();
 
     }).then(async (pollList) => {
-      console.log({ pollList })
       const pollsRow = $('#pollsRow');
       const pollTemplate = $('#pollTemplate');
 
       for (i = 0; i < pollList.length; i++) {
 
         const pollData = await pollingInstance.getPollInformation.call(pollList[i]);
-        console.log({ pollData })
         pollTemplate.find('.panel-title').text(pollData._topic);
         // pollTemplate.find('img').attr('src', pollData.picture);
         pollTemplate.find('.poll-description').text(pollData._description);
         pollTemplate.find('.poll-sponsor').text(pollData._sponsor);
-        
+
         let inputTemplate = '';
-        for (let i = 0; i < pollData._options.length; i++) {
-          // const str = web3.utils.hexToUtf8(pollData._options[i]);
-          const str = web3.utils.hexToUtf8(web3.utils.numberToHex(pollData._options[i]));
-          console.log({ str });
-          // pollOptions.append(`
+        for (let j = 0; j < pollData._options.length; j++) {
+          const str = web3.utils.hexToUtf8(web3.utils.numberToHex(pollData._options[j]));
           inputTemplate += (`
               <input
                 class="form-check-input poll-options"
                 type="radio"
-                name="pollOption"
+                name="${pollList[i]}_radio"
                 id="pollOption${i}"
-              />
-              <label class="form-check-label" for="pollOption${i}">${str}</label>
+                value="${str}"
+              /> 
+              <label class="form-check-label" for="pollOption${j}">${str}</label>
               <br />
           `)
         }
         pollTemplate.find('.poll-options').html(inputTemplate);
-
         pollTemplate.find('.poll-voters').text(pollData[4].join('\n'));
         pollTemplate.find('.poll-expired-block').text(pollData._expiredBlock);
-
         pollTemplate.find('.btn-vote').attr('data-id', pollList[i]);
 
         const voted = await pollingInstance.isVoted.call(pollList[i]);
@@ -117,13 +111,12 @@ App = {
     event.preventDefault();
 
     const pollId = $(event.target).data('id').toString();
-    console.log({ pollId })
+    const choice = web3.utils.utf8ToHex(
+      $(`input[name='${pollId}_radio']:checked`).val()
+    );
 
-    let pollingInstance;
-
-    App.contracts.Polling.deployed().then((inst) => {
-      pollingInstance = inst;
-      return pollingInstance.voterPolls(pollId, { from: accounts[0] });
+    App.contracts.Polling.deployed().then((pollingInstance) => {
+      return pollingInstance.voterPolls(pollId, choice, { from: accounts[0] });
     }).then((result) => {
       console.log({ result })
       return location.reload();
