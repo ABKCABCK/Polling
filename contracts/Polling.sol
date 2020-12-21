@@ -11,19 +11,16 @@ contract Polling {
         address[] voters;
     }
 
-    struct Answer {
-        bytes32 pollId;
-        bytes32 choice;
-    }
     // track poll by poll id
-    mapping(bytes32 => Poll) public polls;
+    mapping(bytes32 => Poll) private polls;
     // track poll id for sponsors
     mapping(address => bytes32[]) public pollIdOfSponsor;
     mapping(address => mapping(bytes32 => bool)) private sponsorRaised;
     // track poll id being polled by voter
-    mapping(address => Answer[]) public answerOfVoter;
-    // mapping(address => bytes32[]) public pollIdOfVoter;
+    mapping(address => bytes32[]) public pollIdOfVoter;
+    mapping(address => mapping(bytes32 => bytes32)) private choiceOfVoter;
     mapping(address => mapping(bytes32 => bool)) private voterPolled;
+    
     mapping(bytes32 => mapping(bytes32 => bool)) private optionRegistry;
 
     uint256 public totalPollsCount;
@@ -85,11 +82,9 @@ contract Polling {
         // pollIdOfVoter[_voter].push(_pollId);
         voterPolled[_voter][_pollId] = true;
 
-        Answer memory answer = Answer({
-            pollId: _pollId,
-            choice: _choice
-        });
-        answerOfVoter[_voter].push(answer);
+        
+        pollIdOfVoter[_voter].push(_pollId);
+        choiceOfVoter[_voter][_pollId] =_choice;
         return true;
     }
 
@@ -136,12 +131,11 @@ contract Polling {
     }
 
     function getVotersPollList() public view returns (bytes32[] memory) {
-        uint _l = answerOfVoter[msg.sender].length;
-        bytes32[] memory _pollList = new bytes32[](_l);
-        for (uint i=0; i<_l; i++) {
-            _pollList[i] = answerOfVoter[msg.sender][i].pollId;
-        }
-        return _pollList;
+        return pollIdOfVoter[msg.sender];
+    }
+
+    function getVotersChoice(bytes32 _pollId) public view returns (bytes32) {
+        return choiceOfVoter[msg.sender][_pollId];
     }
 
     function isVoted(bytes32 _pollId) public view returns (bool) {

@@ -128,12 +128,12 @@ contract("Polling", function (accounts) {
 
     let pollId = finalPollList[0];
 
-    let status, pollIdOfVoter, choice;
+    let status, pollIdOfVoter, choice, isVoted, selected;
 
-    status = await pollContractInstance.polls(pollId);
+    status = await pollContractInstance.getPollInformation(pollId);
     choice = TEST_OPTION[0];
     pollIdOfVoter = await pollContractInstance.getVotersPollList({ from: testVoter });
-    assert.strictEqual(status._voters, undefined, "Polling Contract: invalid voter length of poll before first voting at 0");
+    // assert.strictEqual(status._voters, undefined, "Polling Contract: invalid voter length of poll before first voting at 0");
     assert.strictEqual(pollIdOfVoter.length, 0, "Polling Contract: invalid poll length of voter before first voting at 0");
 
     await pollContractInstance.voterPolls(
@@ -142,8 +142,10 @@ contract("Polling", function (accounts) {
     );
     status = await pollContractInstance.getPollInformation(pollId);
     pollIdOfVoter = await pollContractInstance.getVotersPollList({ from: testVoter });
+    isVoted = await pollContractInstance.isVoted(pollId, { from: testVoter });
     assert.strictEqual(status._voters.length, 1, "Polling Contract: invalid voter length of poll after first voting at 0");
     assert.strictEqual(pollIdOfVoter.length, 1, "Polling Contract: invalid poll length of voter after first voting at 0");
+    assert.isTrue(isVoted, "Polling Contract: should be true");
 
     await pollContractInstance.voterPolls(
       pollId, choice,
@@ -151,8 +153,10 @@ contract("Polling", function (accounts) {
     );
     status = await pollContractInstance.getPollInformation(pollId);
     pollIdOfVoter = await pollContractInstance.getVotersPollList({ from: accounts[2] });
+    isVoted = await pollContractInstance.isVoted(pollId, { from: accounts[2] });
     assert.strictEqual(status._voters.length, 2, "Polling Contract: invalid voter length of poll after second voting at 0");
     assert.strictEqual(pollIdOfVoter.length, 1, "Polling Contract: invalid poll length of voter after second voting at 0");
+    assert.isTrue(isVoted, "Polling Contract: should be true");
 
     pollId = finalPollList[1];
     choice = TEST_OPTION[1];
@@ -163,8 +167,10 @@ contract("Polling", function (accounts) {
     );
     status = await pollContractInstance.getPollInformation(pollId);
     pollIdOfVoter = await pollContractInstance.getVotersPollList({ from: testVoter });
+    isVoted = await pollContractInstance.isVoted(pollId, { from: testVoter });
     assert.strictEqual(status._voters.length, 1, "Polling Contract: invalid voter length of poll after first voting at 1");
     assert.strictEqual(pollIdOfVoter.length, 2, "Polling Contract: invalid poll length of voter after first voting at 1");
+    assert.isTrue(isVoted, "Polling Contract: should be true");
 
     pollId = finalPollList[2];
     choice = TEST_OPTION[2];
@@ -175,8 +181,10 @@ contract("Polling", function (accounts) {
     );
     status = await pollContractInstance.getPollInformation(pollId);
     pollIdOfVoter = await pollContractInstance.getVotersPollList({ from: testVoter });
+    isVoted = await pollContractInstance.isVoted(pollId, { from: testVoter });
     assert.strictEqual(status._voters.length, 1, "Polling Contract: invalid voter length of poll after first voting at 1");
     assert.strictEqual(pollIdOfVoter.length, 3, "Polling Contract: invalid poll length of voter after first voting at 1");
+    assert.isTrue(isVoted, "Polling Contract: should be true");
 
     return true;
   });
@@ -204,7 +212,7 @@ contract("Polling", function (accounts) {
 
     truffleAssert.fails(
       pollContractInstance.voterPolls(
-        finalPollList[1], TEST_OPTION[1]+"123",
+        finalPollList[1], TEST_OPTION[1] + "123",
         { from: testVoter }
       ),
       truffleAssert.ErrorType.REVERT,

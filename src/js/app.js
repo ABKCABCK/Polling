@@ -15,6 +15,9 @@ App = {
       App.web3Provider = window.ethereum;
       try {
         await window.ethereum.enable();
+        window.ethereum.on('accountsChanged', function (accounts) {
+          window.location.reload();
+        })
 
       } catch (error) {
         console.error("User denied account access")
@@ -93,11 +96,18 @@ App = {
         pollTemplate.find('.poll-expired-block').text(pollData._expiredBlock);
         pollTemplate.find('.btn-vote').attr('data-id', pollList[i]);
 
-        const voted = await pollingInstance.isVoted.call(pollList[i]);
+        const voted = await pollingInstance.isVoted.call(pollList[i], { from: accounts[0] });
         if (voted) {
           pollTemplate.find('.btn-vote').prop('disabled', true);
+          pollTemplate.find(`input[name='${pollList[i]}_radio']`).prop('disabled', true);
+          
+          let _choice = await pollingInstance.getVotersChoice.call(pollList[i], { from: accounts[0] });
+          _choice = web3.utils.hexToUtf8(web3.utils.numberToHex(_choice));
+          pollTemplate.find(`:radio[value="${_choice}"]`).attr('checked', true);
+
         } else {
           pollTemplate.find('.btn-vote').prop('disabled', false);
+          pollTemplate.find(`input[name='${pollList[i]}_radio']`).prop('disabled', false);
         }
 
         pollsRow.append(pollTemplate.html());
