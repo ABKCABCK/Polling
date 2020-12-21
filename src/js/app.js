@@ -41,11 +41,22 @@ App = {
   },
 
   initContract: function () {
-    $.getJSON('Polling.json', function (pollingArtifact) {
+    $.getJSON('Polling.json', (pollingArtifact) => {
 
       App.contracts.Polling = TruffleContract(pollingArtifact);
       App.contracts.Polling.setProvider(App.web3Provider);
 
+      App.contracts.Polling.deployed().then(async (pollingInstance) => {
+        $("#account_info").text(accounts[0]);
+        const blockNumber = await web3.eth.getBlockNumber();
+        console.log(blockNumber);
+        $("#current_block_number").text(blockNumber);
+
+        const sponsedPollList = await pollingInstance.getSponsorsPollList({ from: accounts[0] })
+        const votedPollList = await pollingInstance.getVotersPollList({ from: accounts[0] })
+        $("#sponsed_poll").text(sponsedPollList.join('\n'));
+        $("#voted_poll").text(votedPollList.join('\n'));
+      })
       return App.getPollList();
     });
 

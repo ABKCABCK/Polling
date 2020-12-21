@@ -29,6 +29,8 @@
 
         <button class="btn btn-default btn-raise" type="button" data-id="0" data-toggle="modal"
           data-target="#pollSubmitModal">Raise Your Own Poll!</button>
+        <button class="btn btn-default btn-raise" type="button" data-id="0" data-toggle="modal"
+          data-target="#informationModal">Your Information</button>
         <hr />
 
         <br />
@@ -45,7 +47,7 @@
       <div class="panel panel-default panel-poll">
         <div class="panel-heading">
           <h3 class="panel-title">Scrappy</h3>
-          </div>
+        </div>
         <form>
           <div class="panel-body blockquote">
             <!-- <img alt="140x140" data-src="holder.js/140x140" class="img-rounded img-center" style="width: 100%;"
@@ -70,6 +72,43 @@
     </div>
   </div>
 
+
+  <div class="modal fade" id="informationModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Your Information</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="account_info">Account</label><br />
+              <span id="account_info"></span>
+            </div>
+            <div class="form-group">
+              <label for="current_block_number">Current Block</label><br />
+              <span id="current_block_number"></span>
+            </div>
+            <div class="form-group">
+              <label for="sponsed_poll">Sponsed Poll</label><br />
+              <span id="sponsed_poll"></span>
+            </div>
+            <div class="form-group">
+              <label for="voted_poll">Voted Poll</label><br />
+              <span id="voted_poll"></span>
+            </div>
+            
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="modal fade" id="pollSubmitModal" tabindex="-1" role="dialog" aria-labelledby="pollSubmitModalLabel"
     aria-hidden="true">
