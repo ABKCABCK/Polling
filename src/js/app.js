@@ -69,8 +69,8 @@ App = {
       const pollTemplate = $('#pollTemplate');
 
       for (i = 0; i < pollList.length; i++) {
-
-        const pollData = await pollingInstance.getPollInformation.call(pollList[i]);
+        const pollId = pollList[i];
+        const pollData = await pollingInstance.getPollInformation.call(pollId);
         pollTemplate.find('.panel-title').text(pollData._topic);
         // pollTemplate.find('img').attr('src', pollData.picture);
         pollTemplate.find('.poll-description').text(pollData._description);
@@ -83,7 +83,7 @@ App = {
               <input
                 class="form-check-input poll-options"
                 type="radio"
-                name="${pollList[i]}_radio"
+                name="${pollId}_radio"
                 id="pollOption${i}"
                 value="${str}"
               /> 
@@ -94,20 +94,26 @@ App = {
         pollTemplate.find('.poll-options').html(inputTemplate);
         pollTemplate.find('.poll-voters').text(pollData[4].join('\n'));
         pollTemplate.find('.poll-expired-block').text(pollData._expiredBlock);
-        pollTemplate.find('.btn-vote').attr('data-id', pollList[i]);
+        pollTemplate.find('.btn-vote').attr('data-id', pollId);
 
-        const voted = await pollingInstance.isVoted.call(pollList[i], { from: accounts[0] });
-        if (voted) {
+        const voted = await pollingInstance.isVoted.call(pollId, { from: accounts[0] });
+        const expired = await pollingInstance.isPollExpired.call(pollId);
+
+        if (voted || expired) {
           pollTemplate.find('.btn-vote').prop('disabled', true);
-          pollTemplate.find(`input[name='${pollList[i]}_radio']`).prop('disabled', true);
-          
-          let _choice = await pollingInstance.getVotersChoice.call(pollList[i], { from: accounts[0] });
-          _choice = web3.utils.hexToUtf8(web3.utils.numberToHex(_choice));
-          pollTemplate.find(`:radio[value="${_choice}"]`).attr('checked', true);
+          pollTemplate.find(`input[name='${pollId}_radio']`).prop('disabled', true);
+
+          if (voted) {
+            let _choice = await pollingInstance.getVotersChoice.call(pollId, { from: accounts[0] });
+            _choice = web3.utils.hexToUtf8(web3.utils.numberToHex(_choice));
+            pollTemplate.find(`:radio[value="${_choice}"]`).attr('checked', true);
+          } else {
+            pollTemplate.find('.panel-title').text(pollData._topic + " (EXPIRED!!)");
+          }
 
         } else {
           pollTemplate.find('.btn-vote').prop('disabled', false);
-          pollTemplate.find(`input[name='${pollList[i]}_radio']`).prop('disabled', false);
+          pollTemplate.find(`input[name='${pollId}_radio']`).prop('disabled', false);
         }
 
         pollsRow.append(pollTemplate.html());

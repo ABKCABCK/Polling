@@ -72,8 +72,7 @@ contract Polling {
     function voterPolls(bytes32 _pollId, bytes32 _choice) external returns (bool) {
         require(polls[_pollId].sponsor != address(0), "Poll isn't existed");
         require(optionRegistry[_pollId][_choice], "Poll doesn't have such choice");
-        (, bool _expired) = getPollStatus(_pollId);
-        require(!_expired, "Poll is expired");
+        require(!isPollExpired(_pollId), "Poll is expired");
 
         address _voter = msg.sender;
         require(!voterPolled[_voter][_pollId], "You've polled for this");
@@ -109,16 +108,14 @@ contract Polling {
         _options = poll.options;
         _voters = poll.voters;
         _expiredBlock = poll.expiredBlock;
-        (, _expired) = getPollStatus(_pollId);
+        _expired = isPollExpired(_pollId);
     }
 
-    function getPollStatus(bytes32 _pollId)
-        internal
+    function isPollExpired(bytes32 _pollId)
+        public
         view
-        returns (uint256 _blockLeft, bool _expired)
+        returns (bool _expired)
     {
-        int256 blockLeft = int256(block.number - polls[_pollId].expiredBlock);
-        _blockLeft = blockLeft <= 0 ? 0 : uint256(blockLeft);
         _expired = block.number >= polls[_pollId].expiredBlock;
     }
 
