@@ -46,8 +46,9 @@ App = {
       App.contracts.Polling = TruffleContract(pollingArtifact);
       App.contracts.Polling.setProvider(App.web3Provider);
 
-      App.contracts.Polling.deployed().then(async (pollingInstance) => {
-        $("#account_info").text(accounts[0]);
+      App.contracts.Polling.at("0x4b9BDE4e3daFBE20270845dA76Dfd1dAE587d4E0").then(async (pollingInstance) => {
+        // App.contracts.Polling.deployed().then(async (pollingInstance) => {
+          $("#account_info").text(accounts[0]);
         const blockNumber = await web3.eth.getBlockNumber();
         $("#current_block_number").text(blockNumber);
 
@@ -70,8 +71,9 @@ App = {
   getPollList: function () {
     let pollingInstance;
 
-    App.contracts.Polling.deployed().then((inst) => {
-      pollingInstance = inst;
+    App.contracts.Polling.at("0x4b9BDE4e3daFBE20270845dA76Dfd1dAE587d4E0").then((inst) => {
+      // App.contracts.Polling.deployed().then((inst) => {
+        pollingInstance = inst;
       return pollingInstance.getPollList.call();
 
     }).then(async (pollList) => {
@@ -140,8 +142,9 @@ App = {
     const choice = web3.utils.utf8ToHex(
       $(`input[name='${pollId}_radio']:checked`).val()
     );
+    App.contracts.Polling.at("0x4b9BDE4e3daFBE20270845dA76Dfd1dAE587d4E0").then((pollingInstance) => {
 
-    App.contracts.Polling.deployed().then((pollingInstance) => {
+    // App.contracts.Polling.deployed().then((pollingInstance) => {
       return pollingInstance.voterVotesAPoll(pollId, choice, { from: accounts[0] });
     }).then((result) => {
       console.log({ result })
@@ -168,7 +171,8 @@ App = {
 
     let pollingInstance;
 
-    App.contracts.Polling.deployed().then((inst) => {
+    App.contracts.Polling.at("0x4b9BDE4e3daFBE20270845dA76Dfd1dAE587d4E0").then((inst) => {
+      // App.contracts.Polling.deployed().then((inst) => {
       pollingInstance = inst;
       return pollingInstance.sponsorRaisesAPoll(topic, description, options, expiry, { from: accounts[0] });
     }).then((result) => {

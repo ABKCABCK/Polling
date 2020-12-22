@@ -22,7 +22,7 @@ const HDWalletProvider = require('truffle-hdwallet-provider');
 const infuraKey = "91a27d4738e0435c817b78abd2f73f95";
 //
 const fs = require('fs');
-const mnemonic = "toddler meadow shrug unusual finish screen soda vault joke spatial useful disease"
+const mnemonic = "dignity cliff river maze amateur silk three pistol priority fuel same regular"
 
 module.exports = {
   /**
