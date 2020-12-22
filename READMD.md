@@ -86,6 +86,9 @@ Website-->Voters: Refresh after confirmation.
 - Result
     ![](https://i.imgur.com/GNTmb8N.png)
 
+### Sample Page
+![](https://i.imgur.com/CojCads.png)
+
 
 
 
