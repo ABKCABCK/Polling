@@ -106,3 +106,5 @@ public
 .vscode
 
 build/
+
+package-lock.json
