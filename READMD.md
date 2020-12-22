@@ -57,6 +57,10 @@ Website-->Voters: Refresh after confirmation.
 
 ```
 
+# Try it!
+https://polling-practice.herokuapp.com/
+
+![](https://i.imgur.com/CojCads.png)
 # Featured Functions
 
 
@@ -86,8 +90,7 @@ Website-->Voters: Refresh after confirmation.
 - Result
     ![](https://i.imgur.com/GNTmb8N.png)
 
-### Sample Page
-![](https://i.imgur.com/CojCads.png)
+
 
 
 
