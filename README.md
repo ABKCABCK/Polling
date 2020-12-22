@@ -1,8 +1,3 @@
----
-title: 'Polling Practice'
-disqus: hackmd
----
-
 # Polling Practice
 
 A practice of polling DAPP
