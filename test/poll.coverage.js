@@ -95,28 +95,28 @@ contract("Polling", function (accounts) {
 
     let pollId = finalPollList[0];
 
-    let status, pollIdOfVoter, choice, isVoted, selected;
+    let status, pollIdOfVoter, option, isVoted, selected;
 
     status = await pollContractInstance.getPollInformation(pollId);
     pollIdOfVoter = await pollContractInstance.getVotersPollList({ from: testVoter });
     assert.strictEqual(status._voters.length, 0, "Polling Contract: invalid voter length of poll before first voting at 0");
     assert.strictEqual(pollIdOfVoter.length, 0, "Polling Contract: invalid poll length of voter before first voting at 0");
 
-    choice = TEST_OPTION[0];
+    option = TEST_OPTION[0];
     await pollContractInstance.voterVotesAPoll(
-      pollId, choice,
+      pollId, option,
       { from: testVoter }
     );
     status = await pollContractInstance.getPollInformation(pollId);
     pollIdOfVoter = await pollContractInstance.getVotersPollList({ from: testVoter });
     isVoted = await pollContractInstance.isVoted(pollId, { from: testVoter });
-    selected = await pollContractInstance.getVotersChoice(pollId, { from: testVoter });
+    selected = await pollContractInstance.getVotersOption(pollId, { from: testVoter });
     assert.strictEqual(status._voters.length, 1, "Polling Contract: invalid voter length of poll after first voting at 0");
     assert.strictEqual(pollIdOfVoter.length, 1, "Polling Contract: invalid poll length of voter after first voting at 0");
     assert.isTrue(isVoted, "Polling Contract: should be true");
 
-    let paddedChoice = choice + "0".repeat(66-choice.length);
-    assert.strictEqual(selected, paddedChoice, "Polling Contract: unmatched choice of test voter");
+    let paddedOption = option + "0".repeat(66-option.length);
+    assert.strictEqual(selected, paddedOption, "Polling Contract: unmatched option of test voter");
 
   });
 
@@ -143,7 +143,7 @@ contract("Polling", function (accounts) {
         { from: accounts[9] }
       ),
       truffleAssert.ErrorType.REVERT,
-      "Poll doesn't have such choice",
+      "Poll doesn't have such option",
       "Polling Contract: should not be voted to an inexisted option",
     );
 

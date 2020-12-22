@@ -66,6 +66,7 @@
             <strong>Expired Block</strong>: <span class="poll-expired-block">99999</span><br />
             <strong>Voters</strong>: <span class="poll-voters" style="word-wrap:break-word">0xabc...</span><br />
             <button class="btn btn-default btn-vote" type="submit" data-id="1">Vote</button>
+            <button class="btn btn-default btn-result" type="button" data-id="1">Check Result</button>
           </div>
         </form>
       </div>
@@ -101,6 +102,54 @@
               <span id="voted_poll"></span>
             </div>
             
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="resultModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Your Information</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="option_1_title">Option 1</label><br />
+              <span id="option_1_title"></span>
+              <br />
+              <label for="option_1_voter">Voters</label><br />
+              <span id="option_1_voter"></span>
+            </div>
+            <div class="form-group">
+              <label for="option_2_title">Option 2</label><br />
+              <span id="option_2_title"></span>
+              <br />
+              <label for="option_2_voter">Voters</label><br />
+              <span id="option_2_voter"></span>
+            </div>
+            <div class="form-group">
+              <label for="option_3_title">Option 3</label><br />
+              <span id="option_3_title"></span>
+              <br />
+              <label for="option_3_voter">Voters</label><br />
+              <span id="option_3_voter"></span>
+            </div>
+            <div class="form-group">
+              <label for="option_4_title">Option 4</label><br />
+              <span id="option_4_title"></span>
+              <br />
+              <label for="option_4_voter">Voters</label><br />
+              <span id="option_4_voter"></span>
+            </div>
           </div>
         </div>
         <div class="modal-footer">

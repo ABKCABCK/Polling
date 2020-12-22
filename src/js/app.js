@@ -46,9 +46,9 @@ App = {
       App.contracts.Polling = TruffleContract(pollingArtifact);
       App.contracts.Polling.setProvider(App.web3Provider);
 
-      App.contracts.Polling.at("0x4b9BDE4e3daFBE20270845dA76Dfd1dAE587d4E0").then(async (pollingInstance) => {
+      App.contracts.Polling.at("0x102FDB7c6fc623f30791D0573219cf4aF7f872FC").then(async (pollingInstance) => {
         // App.contracts.Polling.deployed().then(async (pollingInstance) => {
-          $("#account_info").text(accounts[0]);
+        $("#account_info").text(accounts[0]);
         const blockNumber = await web3.eth.getBlockNumber();
         $("#current_block_number").text(blockNumber);
 
@@ -65,15 +65,16 @@ App = {
 
   bindEvents: function () {
     $(document).on('click', '.btn-vote', App.handleVote);
+    $(document).on('click', '.btn-result', App.handleCheckResult);
     $("#pollForm").on('submit', App.handleRaise);
   },
 
   getPollList: function () {
     let pollingInstance;
 
-    App.contracts.Polling.at("0x4b9BDE4e3daFBE20270845dA76Dfd1dAE587d4E0").then((inst) => {
+    App.contracts.Polling.at("0x102FDB7c6fc623f30791D0573219cf4aF7f872FC").then((inst) => {
       // App.contracts.Polling.deployed().then((inst) => {
-        pollingInstance = inst;
+      pollingInstance = inst;
       return pollingInstance.getPollList.call();
 
     }).then(async (pollList) => {
@@ -107,6 +108,7 @@ App = {
         pollTemplate.find('.poll-voters').text(pollData[4].join('\n'));
         pollTemplate.find('.poll-expired-block').text(pollData._expiredBlock);
         pollTemplate.find('.btn-vote').attr('data-id', pollId);
+        pollTemplate.find('.btn-result').attr('data-id', pollId);
 
         const voted = await pollingInstance.isVoted.call(pollId, { from: accounts[0] });
         const expired = await pollingInstance.isPollExpired.call(pollId);
@@ -116,7 +118,7 @@ App = {
           pollTemplate.find(`input[name='${pollId}_radio']`).prop('disabled', true);
 
           if (voted) {
-            let _choice = await pollingInstance.getVotersChoice.call(pollId, { from: accounts[0] });
+            let _choice = await pollingInstance.getVotersOption.call(pollId, { from: accounts[0] });
             _choice = web3.utils.hexToUtf8(web3.utils.numberToHex(_choice));
             pollTemplate.find(`:radio[value="${_choice}"]`).attr('checked', true);
           } else {
@@ -135,6 +137,36 @@ App = {
     });
   },
 
+  handleCheckResult: function (event) {
+    event.preventDefault();
+
+    const pollId = $(event.target).data('id').toString();
+    let pollingInstance, options;
+
+    App.contracts.Polling.at("0x102FDB7c6fc623f30791D0573219cf4aF7f872FC").then((inst) => {
+      // App.contracts.Polling.deployed().then((pollingInstance) => {
+      pollingInstance = inst;
+      return pollingInstance.getPollInformation.call(pollId);
+    }).then((pollData) => {
+      options = pollData._options;
+      return Promise.all([
+        pollingInstance.getPollVoters.call(pollId, options[0]),
+        pollingInstance.getPollVoters.call(pollId, options[1]),
+        pollingInstance.getPollVoters.call(pollId, options[2]),
+        pollingInstance.getPollVoters.call(pollId, options[3]),
+      ])
+    }).then((result) => {
+      for (let i = 0; i < result.length; i++) {
+        $(`#option_${i + 1}_title`).text(web3.utils.hexToUtf8(web3.utils.numberToHex(options[i])));
+        $(`#option_${i + 1}_voter`).text(result[i].join('\n'));
+      }
+      $("#resultModal").modal();
+      // return location.reload();
+    }).catch((err) => {
+      console.log(err.message);
+    });
+  },
+
   handleVote: function (event) {
     event.preventDefault();
 
@@ -142,12 +174,10 @@ App = {
     const choice = web3.utils.utf8ToHex(
       $(`input[name='${pollId}_radio']:checked`).val()
     );
-    App.contracts.Polling.at("0x4b9BDE4e3daFBE20270845dA76Dfd1dAE587d4E0").then((pollingInstance) => {
-
-    // App.contracts.Polling.deployed().then((pollingInstance) => {
+    App.contracts.Polling.at("0x102FDB7c6fc623f30791D0573219cf4aF7f872FC").then((pollingInstance) => {
+      // App.contracts.Polling.deployed().then((pollingInstance) => {
       return pollingInstance.voterVotesAPoll(pollId, choice, { from: accounts[0] });
     }).then((result) => {
-      console.log({ result })
       return location.reload();
     }).catch((err) => {
       console.log(err.message);
@@ -171,7 +201,7 @@ App = {
 
     let pollingInstance;
 
-    App.contracts.Polling.at("0x4b9BDE4e3daFBE20270845dA76Dfd1dAE587d4E0").then((inst) => {
+    App.contracts.Polling.at("0x102FDB7c6fc623f30791D0573219cf4aF7f872FC").then((inst) => {
       // App.contracts.Polling.deployed().then((inst) => {
       pollingInstance = inst;
       return pollingInstance.sponsorRaisesAPoll(topic, description, options, expiry, { from: accounts[0] });

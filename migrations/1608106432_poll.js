@@ -5,12 +5,12 @@ module.exports = async function (deployer, networks, accounts) {
 
   //test
 
-  if (networks === 'rinkeby') {
+  if (networks === 'ropsten' || networks === 'development') {
     // if (networks === 'development') {
       const pollInstance = await Polling.deployed();
     console.log({ address: pollInstance.address })
 
-    let expiredBlock = 0;
+    let expiredBlock = await web3.eth.getBlockNumber();
 
     let TEST_OPTION = [
       '~100',

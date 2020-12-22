@@ -11,20 +11,23 @@ contract Polling {
         address[] voters;
     }
 
+    struct OptionResult {
+        address[] voters;
+        bool registered;
+    }
+
     // track poll by poll id
     mapping(bytes32 => Poll) private polls;
-    // track poll id for sponsors
+    bytes32[] private pollList;
+    mapping(bytes32 => mapping(bytes32 => OptionResult)) private optionResults;
+    // track poll id for sponsors and voters
     mapping(address => bytes32[]) public pollIdOfSponsor;
-    mapping(address => mapping(bytes32 => bool)) private sponsorRaised;
-    // track poll id being polled by voter
     mapping(address => bytes32[]) public pollIdOfVoter;
-    mapping(address => mapping(bytes32 => bytes32)) private choiceOfVoter;
+    // track poll status and option of voters
+    mapping(address => mapping(bytes32 => bytes32)) private optionOfVoter;
     mapping(address => mapping(bytes32 => bool)) private voterPolled;
     
-    mapping(bytes32 => mapping(bytes32 => bool)) private optionRegistry;
-
     uint256 public totalPollsCount;
-    bytes32[] public pollList;
 
     constructor() public {
         totalPollsCount = 0;
@@ -47,8 +50,6 @@ contract Polling {
             abi.encodePacked(_sponsor, _totalPollsCount, _topic, _expiredBlock)
         );
 
-        require(!sponsorRaised[_sponsor][_pollId], "Poll is existed");
-
         Poll memory _poll;
         _poll.topic = _topic;
         _poll.sponsor = _sponsor;
@@ -58,10 +59,9 @@ contract Polling {
 
         polls[_pollId] = _poll;
         pollIdOfSponsor[_sponsor].push(_pollId);
-        sponsorRaised[_sponsor][_pollId] = true;
 
         for (uint i=0; i<_options.length; i++) {
-            optionRegistry[_pollId][_options[i]] = true;
+            optionResults[_pollId][_options[i]].registered = true;
         }
 
         pollList.push(_pollId);
@@ -69,9 +69,9 @@ contract Polling {
         return true;
     }
 
-    function voterVotesAPoll(bytes32 _pollId, bytes32 _choice) external returns (bool) {
+    function voterVotesAPoll(bytes32 _pollId, bytes32 _option) external returns (bool) {
         require(polls[_pollId].sponsor != address(0), "Poll isn't existed");
-        require(optionRegistry[_pollId][_choice], "Poll doesn't have such choice");
+        require(optionResults[_pollId][_option].registered, "Poll doesn't have such option");
         require(!isPollExpired(_pollId), "Poll is expired");
 
         address _voter = msg.sender;
@@ -83,7 +83,9 @@ contract Polling {
 
         
         pollIdOfVoter[_voter].push(_pollId);
-        choiceOfVoter[_voter][_pollId] =_choice;
+        optionOfVoter[_voter][_pollId] =_option;
+
+        optionResults[_pollId][_option].voters.push(_voter);
         return true;
     }
 
@@ -111,16 +113,12 @@ contract Polling {
         _expired = isPollExpired(_pollId);
     }
 
-    function isPollExpired(bytes32 _pollId)
-        public
-        view
-        returns (bool _expired)
-    {
-        _expired = block.number >= polls[_pollId].expiredBlock;
-    }
-
     function getPollList() public view returns (bytes32[] memory) {
         return pollList;
+    }
+
+    function getPollVoters(bytes32 _pollId, bytes32 _option) public view returns (address[] memory) {
+        return optionResults[_pollId][_option].voters;
     }
 
     function getSponsorsPollList() public view returns (bytes32[] memory) {
@@ -131,15 +129,19 @@ contract Polling {
         return pollIdOfVoter[msg.sender];
     }
 
-    function getVotersChoice(bytes32 _pollId) public view returns (bytes32) {
-        return choiceOfVoter[msg.sender][_pollId];
+    function getVotersOption(bytes32 _pollId) public view returns (bytes32) {
+        return optionOfVoter[msg.sender][_pollId];
+    }
+
+    function isPollExpired(bytes32 _pollId) public view returns (bool) {
+        return (block.number >= polls[_pollId].expiredBlock);
     }
 
     function isVoted(bytes32 _pollId) public view returns (bool) {
         return voterPolled[msg.sender][_pollId];
     }
 
-    function isOptionBelongToPoll(bytes32 _pollId, bytes32 _choice) public view returns (bool) {
-        return optionRegistry[_pollId][_choice];
+    function isOptionBelongToPoll(bytes32 _pollId, bytes32 _option) public view returns (bool) {
+        return optionResults[_pollId][_option].registered;
     }
 }
