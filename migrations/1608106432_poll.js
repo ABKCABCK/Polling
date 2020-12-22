@@ -22,17 +22,17 @@ module.exports = async function (deployer, networks, accounts) {
     const sponsor = accounts[0];
 
     expiredBlock += 10000;
-    await pollInstance.sponsorCreatePoll('Annual Income(T)', 'What\'s your annual income?(In thousand)', TEST_OPTION, expiredBlock, {
+    await pollInstance.sponsorRaisesAPoll('Annual Income(T)', 'What\'s your annual income?(In thousand)', TEST_OPTION, expiredBlock, {
       from: sponsor,
     })
 
     expiredBlock += 10000;
-    await pollInstance.sponsorCreatePoll('Annual Income(M)', 'What\'s your annual income?(In million)', TEST_OPTION, expiredBlock, {
+    await pollInstance.sponsorRaisesAPoll('Annual Income(M)', 'What\'s your annual income?(In million)', TEST_OPTION, expiredBlock, {
       from: sponsor,
     })
 
     // expiredBlock += 10000;
-    // await pollInstance.sponsorCreatePoll('Annual Income(B)', 'What\'s your annual income?(In billion)', TEST_OPTION, expiredBlock, {
+    // await pollInstance.sponsorRaisesAPoll('Annual Income(B)', 'What\'s your annual income?(In billion)', TEST_OPTION, expiredBlock, {
     //   from: sponsor,
     // })
   }

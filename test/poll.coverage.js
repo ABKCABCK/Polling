@@ -29,12 +29,6 @@ contract("Polling", function (accounts) {
     testExpiredBlock = 999999999;
 
     pollContractInstance = await Polling.deployed();
-    console.log({
-      contractAddress: pollContractInstance.address,
-      testSponsor,
-      testVoter,
-      testExpiredBlock,
-    })
 
     TEST_OPTION = TEST_OPTION.map(e => {
       // return web3.utils.hexToBytes(web3.utils.utf8ToHex(e));
@@ -42,7 +36,7 @@ contract("Polling", function (accounts) {
     })
   })
 
-  it("should successfully create a poll", async function () {
+  it("should successfully raise a poll", async function () {
 
     let pollList, pollIdOfSponsor;
 
@@ -51,7 +45,7 @@ contract("Polling", function (accounts) {
     assert.strictEqual(pollList.length, 0, "Polling Contract: invalid poll list length before first polling");
     assert.strictEqual(pollIdOfSponsor.length, 0, "Polling Contract: invalid poll length of sponsor before first polling");
 
-    await pollContractInstance.sponsorCreatePoll(
+    await pollContractInstance.sponsorRaisesAPoll(
       TEST_TOPIC,
       TEST_DESCRIPTION,
       TEST_OPTION,
@@ -81,7 +75,7 @@ contract("Polling", function (accounts) {
 
   it("should fail to create a poll", async function () {
     truffleAssert.fails(
-      pollContractInstance.sponsorCreatePoll(
+      pollContractInstance.sponsorRaisesAPoll(
         TEST_TOPIC,
         TEST_DESCRIPTION,
         TEST_OPTION,
@@ -109,7 +103,7 @@ contract("Polling", function (accounts) {
     assert.strictEqual(pollIdOfVoter.length, 0, "Polling Contract: invalid poll length of voter before first voting at 0");
 
     choice = TEST_OPTION[0];
-    await pollContractInstance.voterPolls(
+    await pollContractInstance.voterVotesAPoll(
       pollId, choice,
       { from: testVoter }
     );
@@ -128,7 +122,7 @@ contract("Polling", function (accounts) {
 
   it("should fail to vote again", async function () {
     truffleAssert.fails(
-      pollContractInstance.voterPolls(
+      pollContractInstance.voterVotesAPoll(
         finalPollList[0], TEST_OPTION[0],
         { from: testVoter }
       ),
@@ -144,7 +138,7 @@ contract("Polling", function (accounts) {
 
   it("should fail to vote inexisted option", async function () {
     truffleAssert.fails(
-      pollContractInstance.voterPolls(
+      pollContractInstance.voterVotesAPoll(
         finalPollList[0], TEST_OPTION[0] + "123",
         { from: accounts[9] }
       ),
@@ -160,8 +154,7 @@ contract("Polling", function (accounts) {
   it("should fail to vote an expired option", async function () {
 
     const _blockNumber = (await web3.eth.getBlockNumber()) + 2;
-    console.log({_blockNumber})
-    await pollContractInstance.sponsorCreatePoll(
+    await pollContractInstance.sponsorRaisesAPoll(
       TEST_TOPIC,
       TEST_DESCRIPTION,
       TEST_OPTION,
@@ -172,7 +165,7 @@ contract("Polling", function (accounts) {
     let pollList = await pollContractInstance.getPollList();
 
     truffleAssert.fails(
-      pollContractInstance.voterPolls(
+      pollContractInstance.voterVotesAPoll(
         pollList[1], TEST_OPTION[0],
         { from: accounts[9] }
       ),
@@ -187,8 +180,8 @@ contract("Polling", function (accounts) {
 
   it("should fail to vote a inexisted poll", async function () {
     truffleAssert.fails(
-      pollContractInstance.voterPolls(
-        "0xfoobar", TEST_OPTION[0],
+      pollContractInstance.voterVotesAPoll(
+        "0x7e313030", TEST_OPTION[0],
         { from: testVoter }
       ),
       truffleAssert.ErrorType.REVERT,

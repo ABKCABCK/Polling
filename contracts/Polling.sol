@@ -30,7 +30,7 @@ contract Polling {
         totalPollsCount = 0;
     }
 
-    function sponsorCreatePoll(
+    function sponsorRaisesAPoll(
         string calldata _topic,
         string calldata _description,
         bytes32[] calldata _options,
@@ -69,7 +69,7 @@ contract Polling {
         return true;
     }
 
-    function voterPolls(bytes32 _pollId, bytes32 _choice) external returns (bool) {
+    function voterVotesAPoll(bytes32 _pollId, bytes32 _choice) external returns (bool) {
         require(polls[_pollId].sponsor != address(0), "Poll isn't existed");
         require(optionRegistry[_pollId][_choice], "Poll doesn't have such choice");
         require(!isPollExpired(_pollId), "Poll is expired");

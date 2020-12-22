@@ -49,7 +49,6 @@ App = {
       App.contracts.Polling.deployed().then(async (pollingInstance) => {
         $("#account_info").text(accounts[0]);
         const blockNumber = await web3.eth.getBlockNumber();
-        console.log(blockNumber);
         $("#current_block_number").text(blockNumber);
 
         const sponsedPollList = await pollingInstance.getSponsorsPollList({ from: accounts[0] })
@@ -143,7 +142,7 @@ App = {
     );
 
     App.contracts.Polling.deployed().then((pollingInstance) => {
-      return pollingInstance.voterPolls(pollId, choice, { from: accounts[0] });
+      return pollingInstance.voterVotesAPoll(pollId, choice, { from: accounts[0] });
     }).then((result) => {
       console.log({ result })
       return location.reload();
@@ -171,7 +170,7 @@ App = {
 
     App.contracts.Polling.deployed().then((inst) => {
       pollingInstance = inst;
-      return pollingInstance.sponsorCreatePoll(topic, description, options, expiry, { from: accounts[0] });
+      return pollingInstance.sponsorRaisesAPoll(topic, description, options, expiry, { from: accounts[0] });
     }).then((result) => {
       console.log({ result })
       $("#pollSubmitModal").modal("hide");
