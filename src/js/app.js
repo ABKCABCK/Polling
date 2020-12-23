@@ -46,8 +46,8 @@ App = {
       App.contracts.Polling = TruffleContract(pollingArtifact);
       App.contracts.Polling.setProvider(App.web3Provider);
 
-      App.contracts.Polling.at("0x102FDB7c6fc623f30791D0573219cf4aF7f872FC").then(async (pollingInstance) => {
-        // App.contracts.Polling.deployed().then(async (pollingInstance) => {
+      App.contracts.Polling.at("0x4B15F572b19Fc77aF74DC7Ff0bB0C7531e93eDBf").then(async (pollingInstance) => {
+      // App.contracts.Polling.deployed().then(async (pollingInstance) => {
         $("#account_info").text(accounts[0]);
         const blockNumber = await web3.eth.getBlockNumber();
         $("#current_block_number").text(blockNumber);
@@ -56,6 +56,8 @@ App = {
         const votedPollList = await pollingInstance.getVotersPollList({ from: accounts[0] })
         $("#sponsed_poll").text(sponsedPollList.join('\n'));
         $("#voted_poll").text(votedPollList.join('\n'));
+        App.handleRaisedEvent(pollingInstance);
+        // App.handleVotedEvent(pollingInstance);
       })
       return App.getPollList();
     });
@@ -72,8 +74,8 @@ App = {
   getPollList: function () {
     let pollingInstance;
 
-    App.contracts.Polling.at("0x102FDB7c6fc623f30791D0573219cf4aF7f872FC").then((inst) => {
-      // App.contracts.Polling.deployed().then((inst) => {
+    App.contracts.Polling.at("0x4B15F572b19Fc77aF74DC7Ff0bB0C7531e93eDBf").then((inst) => {
+    // App.contracts.Polling.deployed().then((inst) => {
       pollingInstance = inst;
       return pollingInstance.getPollList.call();
 
@@ -143,8 +145,8 @@ App = {
     const pollId = $(event.target).data('id').toString();
     let pollingInstance, options;
 
-    App.contracts.Polling.at("0x102FDB7c6fc623f30791D0573219cf4aF7f872FC").then((inst) => {
-      // App.contracts.Polling.deployed().then((pollingInstance) => {
+    App.contracts.Polling.at("0x4B15F572b19Fc77aF74DC7Ff0bB0C7531e93eDBf").then((inst) => {
+    // App.contracts.Polling.deployed().then((inst) => {
       pollingInstance = inst;
       return pollingInstance.getPollInformation.call(pollId);
     }).then((pollData) => {
@@ -161,7 +163,6 @@ App = {
         $(`#option_${i + 1}_voter`).text(result[i].join('\n'));
       }
       $("#resultModal").modal();
-      // return location.reload();
     }).catch((err) => {
       console.log(err.message);
     });
@@ -174,8 +175,8 @@ App = {
     const choice = web3.utils.utf8ToHex(
       $(`input[name='${pollId}_radio']:checked`).val()
     );
-    App.contracts.Polling.at("0x102FDB7c6fc623f30791D0573219cf4aF7f872FC").then((pollingInstance) => {
-      // App.contracts.Polling.deployed().then((pollingInstance) => {
+    App.contracts.Polling.at("0x4B15F572b19Fc77aF74DC7Ff0bB0C7531e93eDBf").then((pollingInstance) => {
+    // App.contracts.Polling.deployed().then((pollingInstance) => {
       return pollingInstance.voterVotesAPoll(pollId, choice, { from: accounts[0] });
     }).then((result) => {
       return location.reload();
@@ -201,19 +202,37 @@ App = {
 
     let pollingInstance;
 
-    App.contracts.Polling.at("0x102FDB7c6fc623f30791D0573219cf4aF7f872FC").then((inst) => {
-      // App.contracts.Polling.deployed().then((inst) => {
+    App.contracts.Polling.at("0x4B15F572b19Fc77aF74DC7Ff0bB0C7531e93eDBf").then((inst) => {
+    // App.contracts.Polling.deployed().then((inst) => {
       pollingInstance = inst;
       return pollingInstance.sponsorRaisesAPoll(topic, description, options, expiry, { from: accounts[0] });
     }).then((result) => {
       console.log({ result })
       $("#pollSubmitModal").modal("hide");
-      return location.reload();
+      // return location.reload();
     }).catch((err) => {
       console.log(err.message);
     });
-  }
+  },
 
+  handleRaisedEvent: async function (instance) {
+    instance.Raised()
+      .on('data', function (event) {
+        alert(`
+          A new poll is raised \n
+          sponsor: ${event.returnValues._sponsor},
+          Id: ${event.returnValues._pollId},
+        `);
+        window.location.reload();
+      })
+  },
+
+  handleVotedEvent: async function (instance) {
+    instance.Voted()
+      .on('data', function (event) {
+        console.log(event); // same results as the optional callback above
+      })
+  },
 };
 
 $(function () {
