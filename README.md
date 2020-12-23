@@ -42,15 +42,7 @@ Feature: Voter vote to a poll
 
 # User flows
 ---
-```sequence
-Sponsors->Website: Click "Raise Your Own Poll" button.
-Sponsors->Website: Click "Submit" after filling in.
-Website-->Sponsors: Refresh after confirmation.
-Voters->Website: Choose an interested poll.
-Voters->Website: Vote the poll.
-Website-->Voters: Refresh after confirmation.
-
-```
+![](https://i.imgur.com/P3pPbib.png)
 
 # Try it!
 https://polling-practice.herokuapp.com/
