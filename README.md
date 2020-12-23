@@ -75,7 +75,7 @@ https://polling-practice.herokuapp.com/
     node --max-old-space-size=4096 /usr/local/bin/truffle run coverage --file="test/*.coverage.js"
     ```
 - Result
-    ![](https://i.imgur.com/ZDKPbSu.png)
+    ![](https://i.imgur.com/GLq1rM9.png)
 
 ## Average Gas Used
 - Command

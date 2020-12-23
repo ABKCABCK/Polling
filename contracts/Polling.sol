@@ -29,6 +29,11 @@ contract Polling {
     
     uint256 public totalPollsCount;
 
+
+    // event
+    event Raised(address indexed _sponsor, bytes32 _pollId);
+    event Voted(address indexed _voter, bytes32 _pollId, bytes32 _option);
+
     constructor() public {
         totalPollsCount = 0;
     }
@@ -66,6 +71,7 @@ contract Polling {
 
         pollList.push(_pollId);
 
+        emit Raised(_sponsor, _pollId);
         return true;
     }
 
@@ -78,14 +84,15 @@ contract Polling {
         require(!voterPolled[_voter][_pollId], "You've polled for this");
 
         polls[_pollId].voters.push(_voter);
-        // pollIdOfVoter[_voter].push(_pollId);
         voterPolled[_voter][_pollId] = true;
-
         
         pollIdOfVoter[_voter].push(_pollId);
         optionOfVoter[_voter][_pollId] =_option;
 
         optionResults[_pollId][_option].voters.push(_voter);
+
+        emit Voted(_voter, _pollId, _option);
+
         return true;
     }
 

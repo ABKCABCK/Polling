@@ -45,7 +45,7 @@ contract("Polling", function (accounts) {
     assert.strictEqual(pollList.length, 0, "Polling Contract: invalid poll list length before first polling");
     assert.strictEqual(pollIdOfSponsor.length, 0, "Polling Contract: invalid poll length of sponsor before first polling");
 
-    await pollContractInstance.sponsorRaisesAPoll(
+    let tx = await pollContractInstance.sponsorRaisesAPoll(
       TEST_TOPIC,
       TEST_DESCRIPTION,
       TEST_OPTION,
@@ -53,10 +53,16 @@ contract("Polling", function (accounts) {
       { from: testSponsor }
     );
 
+    
+
     pollList = await pollContractInstance.getPollList();
     pollIdOfSponsor = await pollContractInstance.getSponsorsPollList({ from: testSponsor });
     assert.strictEqual(pollList.length, 1, "Polling Contract: invalid poll list length after first polling");
     assert.strictEqual(pollIdOfSponsor.length, 1, "Polling Contract: invalid poll length of sponsor ar after third polling");
+
+    truffleAssert.eventEmitted(tx, "Raised", (ev)=>{
+      return ev._sponsor === testSponsor && ev._pollId === pollList[0];
+    }, "Polling Contract: should return correct raising event")
 
     let registryStatus = await pollContractInstance.isOptionBelongToPoll(pollList[0], TEST_OPTION[0])
     assert.isTrue(registryStatus, "Polling Contract: should be true");
@@ -68,7 +74,7 @@ contract("Polling", function (accounts) {
     assert.isTrue(registryStatus, "Polling Contract: should be true");
     registryStatus = await pollContractInstance.isOptionBelongToPoll(pollList[0], TEST_OPTION[3] + "123")
     assert.isFalse(registryStatus, "Polling Contract: should be false");
-    finalPollList = pollList;
+    finalPollList = pollList;     
 
     return true;
   });
@@ -103,10 +109,16 @@ contract("Polling", function (accounts) {
     assert.strictEqual(pollIdOfVoter.length, 0, "Polling Contract: invalid poll length of voter before first voting at 0");
 
     option = TEST_OPTION[0];
-    await pollContractInstance.voterVotesAPoll(
+    let tx = await pollContractInstance.voterVotesAPoll(
       pollId, option,
       { from: testVoter }
     );
+
+    let paddedOption = option + "0".repeat(66-option.length);
+    truffleAssert.eventEmitted(tx, "Voted", (ev)=>{
+      return ev._voter === testVoter && ev._pollId === pollId && ev._option === paddedOption;
+    }, "Polling Contract: should return correct voting event");
+
     status = await pollContractInstance.getPollInformation(pollId);
     pollIdOfVoter = await pollContractInstance.getVotersPollList({ from: testVoter });
     isVoted = await pollContractInstance.isVoted(pollId, { from: testVoter });
@@ -114,9 +126,11 @@ contract("Polling", function (accounts) {
     assert.strictEqual(status._voters.length, 1, "Polling Contract: invalid voter length of poll after first voting at 0");
     assert.strictEqual(pollIdOfVoter.length, 1, "Polling Contract: invalid poll length of voter after first voting at 0");
     assert.isTrue(isVoted, "Polling Contract: should be true");
-
-    let paddedOption = option + "0".repeat(66-option.length);
     assert.strictEqual(selected, paddedOption, "Polling Contract: unmatched option of test voter");
+
+    let pollVoters = await pollContractInstance.getPollVoters(pollId, option)
+    assert.strictEqual(pollVoters[0], testVoter, "Polling Contract: unmatched voter of the option");
+    
 
   });
 
